@@ -1,6 +1,6 @@
 currentHeight <- function() {
 
-  #' addressTransactions
+  #' addressHeight
   #'
   #' @description Returns a list of transactionIds for a given address or list
   #' of addresses.

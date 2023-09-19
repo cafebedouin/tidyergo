@@ -1,9 +1,9 @@
-state <- function() {
+blockInfo <- function(height=NULL) {
 
-  #' addressTransactions
+  #' blockInfo
   #'
-  #' @description Returns a list of transactionIds for a given address or list
-  #' of addresses.
+  #' @description Returns a list of 50 of the most recent transactionIds for
+  #' an address or list of addresses.
   #'
   #' Uses an Ergo GraphQL instance to retrieve the following columns:
   #' "transactionId", inclusionHeight", "timestamp"
@@ -18,7 +18,7 @@ state <- function() {
   #' @return The inputs pasted together as a character string.
   #' @details The inputs can be anything that can be input into
   #' the paste function.
-  #' @note And here is a note. Isn't it nice?
+  #' @note
   #' @section I Must Warn You:
   #' The reference provided is a good read.
   #' \subsection{Other warning}{
@@ -34,26 +34,43 @@ state <- function() {
   #' @export
   #' @importFrom base paste
 
-  source("./R/tidyergo-conf.R")
-
-  tokenId <- list(tokenId = tokenId)
-  View(tokenId)
-
-  qry <- Query$new()
-  qry$query('getstateinfo', 'query
-  { state
-    { blockId
-      difficulty
-      height
-      network } }')
-
-  con <- GraphqlClient$new(gql_link)
-  res <- con$exec(qry$queries$getstateinfo)
-  df <- as.data.frame(jsonlite::fromJSON(res))
-
-  if (nrow(df) != 0) {
-    return(as.data.frame(df))
-  } else {
-    return(NULL)
+  source("./R/env.R")
+  if (is.null(height)) {
+    height <- currentHeight()
   }
+  qry <- Query$new()
+  qry$query('getblockinfo', paste0('query {
+    blocks(height: ', height, ') {
+      blockChainTotalSize
+      blockCoins
+      blockFee
+      blockMiningTime
+      blockSize
+      difficulty
+      headerId
+      mainChain
+      maxBoxGix
+      maxTxGix
+      minerAddress
+      minerRevenue
+      minerReward
+      timestamp
+      totalCoinsInTxs
+      totalCoinsIssued
+      totalFees
+      totalMinersReward
+      totalMiningTime
+      totalTxsCount
+      txsCount
+      txsSize
+    }
+  }'))
+
+  con <- GraphqlClient$new(url = gqlURL)
+  res <- con$exec(qry$queries$getblockinfo)
+  df <- jsonlite::fromJSON(res)
+  df <- df$data$blocks
+  df <- cbind(height, df)
+  return(df)
 }
+

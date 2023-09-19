@@ -1,9 +1,8 @@
-state <- function() {
+blockInfoUpdate <- function() {
 
-  #' addressTransactions
+  #' blockInfoUpdate
   #'
-  #' @description Returns a list of transactionIds for a given address or list
-  #' of addresses.
+  #' @description Updates the saved block information from
   #'
   #' Uses an Ergo GraphQL instance to retrieve the following columns:
   #' "transactionId", inclusionHeight", "timestamp"
@@ -18,7 +17,7 @@ state <- function() {
   #' @return The inputs pasted together as a character string.
   #' @details The inputs can be anything that can be input into
   #' the paste function.
-  #' @note And here is a note. Isn't it nice?
+  #' @note
   #' @section I Must Warn You:
   #' The reference provided is a good read.
   #' \subsection{Other warning}{
@@ -34,26 +33,24 @@ state <- function() {
   #' @export
   #' @importFrom base paste
 
-  source("./R/tidyergo-conf.R")
+  source("./R/env.R")
+  cached_file = paste0('./data/blockInfo.csv')
 
-  tokenId <- list(tokenId = tokenId)
-  View(tokenId)
+  if (file.exists(cached_file)) {
 
-  qry <- Query$new()
-  qry$query('getstateinfo', 'query
-  { state
-    { blockId
-      difficulty
-      height
-      network } }')
+    # Read in previously run data
+    cache <- read.csv(paste0(cached_file), skip=0, header=TRUE)
+    cache <- cache[ -c(1) ]
+    height <- sum(cache[nrow(cache),1] + 1)
+    df <- blockInfo(height)
+    df <- rbind(cache,df)
 
-  con <- GraphqlClient$new(gql_link)
-  res <- con$exec(qry$queries$getstateinfo)
-  df <- as.data.frame(jsonlite::fromJSON(res))
-
-  if (nrow(df) != 0) {
-    return(as.data.frame(df))
   } else {
-    return(NULL)
+    df <- blockInfo(height = 2)
+
+    # Cache data
+    write.csv(df, file=paste0('./data/blockInfo.csv'))
   }
+  write.csv(df, file=paste0('./data/blockInfo.csv'))
 }
+

@@ -1,11 +1,14 @@
 library("jsonlite")
-library("httr")
+library(httr)
+library("httr2")
 library("purrr")
+library("ghql")
+library("dplyr")
 # options(scipen=999)
 
 #APIs
 explorerURL <- "https://ergo-explorer.tosidrop.io/"
-gqlURL <- "https://qgl.ergoplatform.com"
+gqlURL <- "https://graphql.ergo.aap.cornell.edu/"
 nodeURL <- "http://128.253.41.49:9053/"
 watchURL <- "https://api.ergo.watch/"
 spectrumURL <- "https://api.spectrum.fi/"

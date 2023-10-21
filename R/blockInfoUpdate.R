@@ -1,9 +1,8 @@
-addressTransactions <- function(address) {
+blockInfoUpdate <- function() {
 
-  #' addressTransactions
+  #' blockInfoUpdate
   #'
-  #' @description Returns a list of transactionIds for a given address or list
-  #' of addresses.
+  #' @description Updates the saved block information from
   #'
   #' Uses an Ergo GraphQL instance to retrieve the following columns:
   #' "transactionId", inclusionHeight", "timestamp"
@@ -18,7 +17,7 @@ addressTransactions <- function(address) {
   #' @return The inputs pasted together as a character string.
   #' @details The inputs can be anything that can be input into
   #' the paste function.
-  #' @note And here is a note. Isn't it nice?
+  #' @note
   #' @section I Must Warn You:
   #' The reference provided is a good read.
   #' \subsection{Other warning}{
@@ -34,24 +33,24 @@ addressTransactions <- function(address) {
   #' @export
   #' @importFrom base paste
 
-  source("./R/config.R")
+  source("./R/env.R")
+  cached_file = paste0('./data/blockInfo.csv')
 
-  # Changes the format to work with query
-  address <- list(address = paste0(address))
+  if (file.exists(cached_file)) {
 
-  # token <- Sys.getenv("GITHUB_TOKEN")
+    # Read in previously run data
+    cache <- read.csv(paste0(cached_file), skip=0, header=TRUE)
+    cache <- cache[ -c(1) ]
+    height <- sum(cache[nrow(cache),1] + 1)
+    df <- blockInfo(height)
+    df <- rbind(cache,df)
 
-  qry <- Query$new()
-  qry$query('gettxinfo', 'query getTxInfo($address: String!){
-  transactions(addresses: [$address]) {
-    transactionId
+  } else {
+    df <- blockInfo(height = 2)
+
+    # Cache data
+    write.csv(df, file=paste0('./data/blockInfo.csv'))
   }
-}')
-
-  con <- GraphqlClient$new(gqlURL)
-  res <- con$exec(qry$queries$gettxinfo, address)
-  df <- as.data.frame(jsonlite::fromJSON(res))
-  names(df) <- gsub("data.transactions.", "", names(df))
-  return(df)
+  write.csv(df, file=paste0('./data/blockInfo.csv'))
 }
 

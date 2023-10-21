@@ -1,9 +1,9 @@
-addressTransactions <- function(address) {
+blockInfo <- function(height=NULL) {
 
-  #' addressTransactions
+  #' blockInfo
   #'
-  #' @description Returns a list of transactionIds for a given address or list
-  #' of addresses.
+  #' @description Returns a list of 50 of the most recent transactionIds for
+  #' an address or list of addresses.
   #'
   #' Uses an Ergo GraphQL instance to retrieve the following columns:
   #' "transactionId", inclusionHeight", "timestamp"
@@ -18,7 +18,7 @@ addressTransactions <- function(address) {
   #' @return The inputs pasted together as a character string.
   #' @details The inputs can be anything that can be input into
   #' the paste function.
-  #' @note And here is a note. Isn't it nice?
+  #' @note
   #' @section I Must Warn You:
   #' The reference provided is a good read.
   #' \subsection{Other warning}{
@@ -34,24 +34,43 @@ addressTransactions <- function(address) {
   #' @export
   #' @importFrom base paste
 
-  source("./R/config.R")
-
-  # Changes the format to work with query
-  address <- list(address = paste0(address))
-
-  # token <- Sys.getenv("GITHUB_TOKEN")
-
-  qry <- Query$new()
-  qry$query('gettxinfo', 'query getTxInfo($address: String!){
-  transactions(addresses: [$address]) {
-    transactionId
+  source("./R/env.R")
+  if (is.null(height)) {
+    height <- currentHeight()
   }
-}')
+  qry <- Query$new()
+  qry$query('getblockinfo', paste0('query {
+    blocks(height: ', height, ') {
+      blockChainTotalSize
+      blockCoins
+      blockFee
+      blockMiningTime
+      blockSize
+      difficulty
+      headerId
+      mainChain
+      maxBoxGix
+      maxTxGix
+      minerAddress
+      minerRevenue
+      minerReward
+      timestamp
+      totalCoinsInTxs
+      totalCoinsIssued
+      totalFees
+      totalMinersReward
+      totalMiningTime
+      totalTxsCount
+      txsCount
+      txsSize
+    }
+  }'))
 
-  con <- GraphqlClient$new(gqlURL)
-  res <- con$exec(qry$queries$gettxinfo, address)
-  df <- as.data.frame(jsonlite::fromJSON(res))
-  names(df) <- gsub("data.transactions.", "", names(df))
+  con <- GraphqlClient$new(url = gqlURL)
+  res <- con$exec(qry$queries$getblockinfo)
+  df <- jsonlite::fromJSON(res)
+  df <- df$data$blocks
+  df <- cbind(height, df)
   return(df)
 }
 

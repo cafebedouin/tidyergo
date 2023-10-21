@@ -1,6 +1,6 @@
-addressTransactions <- function(address) {
+currentHeight <- function() {
 
-  #' addressTransactions
+  #' addressHeight
   #'
   #' @description Returns a list of transactionIds for a given address or list
   #' of addresses.
@@ -34,24 +34,19 @@ addressTransactions <- function(address) {
   #' @export
   #' @importFrom base paste
 
-  source("./R/config.R")
-
-  # Changes the format to work with query
-  address <- list(address = paste0(address))
-
-  # token <- Sys.getenv("GITHUB_TOKEN")
+  source("./R/env.R")
 
   qry <- Query$new()
-  qry$query('gettxinfo', 'query getTxInfo($address: String!){
-  transactions(addresses: [$address]) {
-    transactionId
-  }
-}')
+  qry$query('getheightinfo', 'query { state { height } }')
 
   con <- GraphqlClient$new(gqlURL)
-  res <- con$exec(qry$queries$gettxinfo, address)
-  df <- as.data.frame(jsonlite::fromJSON(res))
-  names(df) <- gsub("data.transactions.", "", names(df))
-  return(df)
-}
+  res <- con$exec(qry$queries$getheightinfo)
+  json <- as.vector(jsonlite::fromJSON(res))
+  height <- json$data$state$height
 
+  if (!is.null(height)) {
+    return(height)
+  } else {
+    return(NULL)
+  }
+}

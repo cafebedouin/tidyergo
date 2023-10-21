@@ -1,4 +1,4 @@
-addressTransactions <- function(address) {
+state <- function() {
 
   #' addressTransactions
   #'
@@ -34,24 +34,26 @@ addressTransactions <- function(address) {
   #' @export
   #' @importFrom base paste
 
-  source("./R/config.R")
+  source("./R/tidyergo-conf.R")
 
-  # Changes the format to work with query
-  address <- list(address = paste0(address))
-
-  # token <- Sys.getenv("GITHUB_TOKEN")
+  tokenId <- list(tokenId = tokenId)
+  View(tokenId)
 
   qry <- Query$new()
-  qry$query('gettxinfo', 'query getTxInfo($address: String!){
-  transactions(addresses: [$address]) {
-    transactionId
-  }
-}')
+  qry$query('getstateinfo', 'query
+  { state
+    { blockId
+      difficulty
+      height
+      network } }')
 
-  con <- GraphqlClient$new(gqlURL)
-  res <- con$exec(qry$queries$gettxinfo, address)
+  con <- GraphqlClient$new(gql_link)
+  res <- con$exec(qry$queries$getstateinfo)
   df <- as.data.frame(jsonlite::fromJSON(res))
-  names(df) <- gsub("data.transactions.", "", names(df))
-  return(df)
-}
 
+  if (nrow(df) != 0) {
+    return(as.data.frame(df))
+  } else {
+    return(NULL)
+  }
+}

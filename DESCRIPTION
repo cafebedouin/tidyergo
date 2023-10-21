@@ -1,19 +1,18 @@
 Package: tidyergo
-Type: Package
-Title: Ergo Blockchain Statistics with R/Tidyverse
-Version: 0.1.0
-Author: Christopher Yee
-Maintainer: Christopher Yee <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
-Encoding: UTF-8
-LazyData: true
-Imports: 
-    httr,
-    jsonlite,
-    dplyr,
-    tidyr,
-    purrr
-RoxygenNote: 7.1.1
-
+Version: 0.1-2
+Date: 2024-01-01
+Title: tidyergo
+Authors@R: c(person(given = "Chris",
+                    family = "Yee"
+                    role = c("aut", "cre")),
+             person(given = "cafebedouin",
+                    role = "aut"
+                    email = "cafebedouin@gmail.com"))
+Maintainer: cafebedouin <cafebedouin@gmail.com>
+Depends: R (>= 4.2.1)
+Description: Functions that pull information from the Ergo Node, Explorer,
+GraphQL and ecosystem dApp APIs.
+License: MIT
+Imports: httr2, jsonlite, dplyr, tidyr, purrr
+URL: https://github.com/Eeysirhc/tidyergo
+BugReports: https://github.com/Eeysirhc/tidyergo/issues

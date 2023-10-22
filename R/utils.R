@@ -1,6 +1,7 @@
 # utils.R
 # functions: currentDifficulty, currentHeight, gqlURL, gqlVersion, mempool,
-#            state, timestampToDate
+#            nodes state, timestampToDate
+# add: heightToTimestamp, timestampToHeight
 
 source("./R/config.R")
 
@@ -123,6 +124,32 @@ mempool <- function() {
   } else {
     return(NULL)
   }
+}
+
+nodes <- function(limit=50) {
+
+  #' node
+  #'
+  #' @description Queries tokenjay.app and returns a dataframe of nodes listing:
+  #' url, lastSeen (timestamp), responseTime, blockHeight, headerHeight, name
+  #' and whether or not the node uses openRestApi and blockchainApi
+  #' @param limit integer
+  #' @usage nodes(50)
+  #' @return a dataframe of nodes listing: url, lastSeen (timestamp),
+  #' responseTime, blockHeight, headerHeight, name and whether or not
+  #' the node uses openRestApi and blockchainApi
+  #' @note This function directly accesses the node using httr2, which is a
+  #' R script wrapper for curl.
+
+  req <- request(paste0(tokenjayURL,
+                        "peers/list?unreachable=false&closedApi=false&limit=",
+                        limit)) %>%
+    req_headers("Content-Type" = "application/json") %>%
+    req_headers("accept" = "application/json")
+
+  resp <- req_perform(req)
+  df <- resp_body_json(resp, check_type = TRUE, simplifyVector = TRUE)
+  return(df)
 }
 
 state <- function() {
